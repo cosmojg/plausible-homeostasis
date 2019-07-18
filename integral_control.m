@@ -23,20 +23,23 @@ simulationcount = 100;
 conductances = zeros(simulationcount,8);
 
 for i = 1:simulationcount
-    g0 = 1e-1+1e-1*rand(8,1);
+    g0 = (0.2/x.AB.A)*rand(8,1);
     x.set('*gbar',g0);
     x.set('*Controller.m',0);
-    x.AB.Leak.gbar = .099;
+    x.AB.Leak.gbar = (0.001/x.AB.A)+((0.199/x.AB.A)*rand());
 
-    x.integrate;
+    [~,~,C] = x.integrate;
 
     conductances(i,:) = x.get('*gbar');
     corelib.textbar(i,simulationcount);
 end
 
+conductances(:,7) = [];
+
+figure(); hold on
 plotmatrix(conductances)
 
-return
+drawnow
 
 figure('outerposition',[300 300 900 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
 subplot(2,1,1); hold on
@@ -56,6 +59,7 @@ plot(time,V,'k')
 set(gca,'YLim',[-80 50])
 ylabel('V_m (mV)')
 xlabel('Time (s)')
+
 drawnow
 
 figlib.pretty('PlotLineWidth',1.5,'LineWidth',1.5)
