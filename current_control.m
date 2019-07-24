@@ -3,8 +3,9 @@ close all
 
 % reproduces Fig 3c in Tim O'Leary's paper
 
-x = xolotl.examples.BurstingNeuron('prefix','liu');
-    
+x = xolotl.examples.BurstingNeuron('prefix','prinz');
+x.AB.add('Leak','gbar',@() 0.0622/x.AB.A,'E',-50);
+
 x.AB.Ca_target = 7;
     
 x.AB.NaV.add('oleary/IntegralController','tau_m',666);
@@ -19,7 +20,7 @@ x.t_end = 5e5;
 x.sim_dt = .1;
 x.dt = 100;
 
-simulationcount = 10;
+simulationcount = 100;
 conductances = zeros(simulationcount,8);
 
 for i = 1:simulationcount
