@@ -6,7 +6,8 @@ close all
 x = xolotl.examples.BurstingNeuron('prefix','prinz');
 x.AB.add('Leak','gbar',@() 0.0622/x.AB.A,'E',-50);
 
-x.AB.Ca_target = 7;
+[V,Ca,M,I] = x.integrate;
+x.AB.Ca_target = mean(Ca(:,1));
     
 x.AB.NaV.add('oleary/IntegralController','tau_m',5000/x.AB.NaV.gbar);
 x.AB.CaT.add('oleary/IntegralController','tau_m',5000/x.AB.CaT.gbar);
@@ -29,7 +30,7 @@ for i = 1:simulationcount
     x.set('*Controller.m',0);
     x.AB.Leak.gbar = (0.001/x.AB.A)+((0.199/x.AB.A)*rand());
 
-    [~,~,C] = x.integrate;
+    [V,Ca,M,I] = x.integrate;
 
     conductances(i,:) = x.get('*gbar');
     corelib.textbar(i,simulationcount);
@@ -45,8 +46,8 @@ drawnow
 figure('outerposition',[300 300 900 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
 subplot(2,1,1); hold on
 
-time = x.dt*(1:length(C))*1e-3;
-plot(time,C(:,2:2:end));
+time = x.dt*(1:length(M))*1e-3;
+plot(time,M(:,2:2:end));
 set(gca,'XScale','log','YScale','log','YTick',[1e-2 1e0 1e2 1e4])
 xlabel('Time (s)')
 ylabel('g (uS/mm^2)')
