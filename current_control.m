@@ -8,13 +8,13 @@ x.AB.add('Leak','gbar',@() 0.0622/x.AB.A,'E',-50);
 
 x.AB.Ca_target = 7;
     
-x.AB.NaV.add('oleary/IntegralController','tau_m',666);
-x.AB.CaT.add('oleary/IntegralController','tau_m',55555);
-x.AB.CaS.add('oleary/IntegralController','tau_m',45454);
-x.AB.ACurrent.add('oleary/IntegralController','tau_m',5000);
-x.AB.KCa.add('oleary/IntegralController','tau_m',1250);
-x.AB.Kd.add('oleary/IntegralController','tau_m',2000);
-x.AB.HCurrent.add('oleary/IntegralController','tau_m',125000);
+x.AB.NaV.add('oleary/IntegralController','tau_m',5000/x.AB.NaV.gbar);
+x.AB.CaT.add('oleary/IntegralController','tau_m',5000/x.AB.CaT.gbar);
+x.AB.CaS.add('oleary/IntegralController','tau_m',5000/x.AB.CaS.gbar);
+x.AB.ACurrent.add('oleary/IntegralController','tau_m',5000/x.AB.ACurrent.gbar);
+x.AB.KCa.add('oleary/IntegralController','tau_m',5000/x.AB.KCa.gbar);
+x.AB.Kd.add('oleary/IntegralController','tau_m',5000/x.AB.Kd.gbar);
+x.AB.HCurrent.add('oleary/IntegralController','tau_m',5000/x.AB.HCurrent.gbar);
 
 x.t_end = 5e5;
 x.sim_dt = .1;
