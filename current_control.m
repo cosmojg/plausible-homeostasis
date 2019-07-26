@@ -22,7 +22,7 @@ x.t_end = 5e5;
 x.sim_dt = .1;
 x.dt = 100;
 
-simulationcount = 100;
+simulationcount = 10;
 conductances = zeros(simulationcount,8);
 
 for i = 1:simulationcount
