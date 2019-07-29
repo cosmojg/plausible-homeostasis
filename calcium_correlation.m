@@ -33,10 +33,19 @@ x.AB.Ca_target = mean(Ca(:,1));
 % calculate total calcium current by summing CaS and CaT
 iCa = sum(I(:,2:3),2);
 
-% instantiate an exponential low pass filter
-K = exp(linspace(0,10000,10000)/-3000);
+% calculate mean calcium current using an exponential low pass filter
+taus = 2000:20:4000;
+iCameans = zeros(1,length(taus));
+for i = 1:length(taus)
+    K = exp(linspace(0,10000,10000)/-taus(i));
+    iCameans(i) = mean(filter(K,sum(K),iCa));
+end
+iCameans_taus = [iCameans; taus];
+writematrix(iCameans_taus,'iCameans_taus.txt')
+% iCameans_taus = importdata('iCameans_taus.txt');
 
 % plot filtered, normalized calcium current against calcium concentration
+K = exp(linspace(0,10000,10000)/-mean(taus));
 figure('outerposition',[300 300 900 600],'PaperUnits','points','PaperSize',[1200 600]); hold on
 plot(filter(K,sum(K),iCa)); hold on
 plot(Ca(:,1))
