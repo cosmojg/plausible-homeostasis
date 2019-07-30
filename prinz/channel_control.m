@@ -35,7 +35,7 @@ x.t_end = 1e5;
 x.AB.Ca_target = x.AB.Ca_average;
 
 % set channel controllers
-controllers = {'oleary/IntegralController', 'plausible-homeostasis/prinz/CurrentIntegralController'};
+controllers = {'IntegralController', 'IntegralCurrentController'};
 if controltype == 1
     x.AB.ACurrent.add(strjoin(controllers(1)));
     x.AB.CaS.add(strjoin(controllers(1)));

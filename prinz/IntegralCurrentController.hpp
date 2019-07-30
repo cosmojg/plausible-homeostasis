@@ -6,13 +6,13 @@
 // This controller can control either a synapse
 // or a conductance 
 
-#ifndef CURRENTINTEGRALCONTROLLER
-#define CURRENTINTEGRALCONTROLLER
+#ifndef INTEGRALCURRENTCONTROLLER
+#define INTEGRALCURRENTCONTROLLER
 #include "mechanism.hpp"
 #include <limits>
 
 //inherit controller class spec
-class CurrentIntegralController: public mechanism {
+class IntegralCurrentController: public mechanism {
 
 protected:
     // flag used to switch between
@@ -41,7 +41,7 @@ public:
 
     // specify parameters + initial conditions for 
     // mechanism that controls a conductance 
-    CurrentIntegralController(double tau_m_, double tau_g_, double tau_filter_, double m_, double i_Ca_smooth_, double i_Ca_target_)
+    IntegralCurrentController(double tau_m_, double tau_g_, double tau_filter_, double m_, double i_Ca_smooth_, double i_Ca_target_)
     {
 
         tau_m = tau_m_;
@@ -52,8 +52,8 @@ public:
         i_Ca_target = i_Ca_target_;
 
 
-        // if (tau_m<=0) {mexErrMsgTxt("[CurrentIntegralController] tau_m must be > 0. Perhaps you meant to set it to Inf?\n");}
-        if (tau_g<=0) {mexErrMsgTxt("[CurrentIntegralController] tau_g must be > 0. Perhaps you meant to set it to Inf?\n");}
+        // if (tau_m<=0) {mexErrMsgTxt("[IntegralCurrentController] tau_m must be > 0. Perhaps you meant to set it to Inf?\n");}
+        if (tau_g<=0) {mexErrMsgTxt("[IntegralCurrentController] tau_g must be > 0. Perhaps you meant to set it to Inf?\n");}
     }
 
     
@@ -72,7 +72,7 @@ public:
 };
 
 
-double CurrentIntegralController::getState(int idx)
+double IntegralCurrentController::getState(int idx)
 {
     if (idx == 1) {return m;}
     else if (idx == 2) {return channel->gbar;}
@@ -81,10 +81,10 @@ double CurrentIntegralController::getState(int idx)
 }
 
 
-int CurrentIntegralController::getFullStateSize(){return 2; }
+int IntegralCurrentController::getFullStateSize(){return 2; }
 
 
-int CurrentIntegralController::getFullState(double *cont_state, int idx)
+int IntegralCurrentController::getFullState(double *cont_state, int idx)
 {
     // give it the current mRNA level
     cont_state[idx] = m;
@@ -106,7 +106,7 @@ int CurrentIntegralController::getFullState(double *cont_state, int idx)
 }
 
 
-void CurrentIntegralController::connect(conductance * channel_)
+void IntegralCurrentController::connect(conductance * channel_)
 {
 
     // connect to a channel
@@ -129,12 +129,12 @@ void CurrentIntegralController::connect(conductance * channel_)
 
 }
 
-void CurrentIntegralController::connect(compartment* comp_)
+void IntegralCurrentController::connect(compartment* comp_)
 {
-    mexErrMsgTxt("[CurrentIntegralController] This mechanism cannot connect to a compartment object");
+    mexErrMsgTxt("[IntegralCurrentController] This mechanism cannot connect to a compartment object");
 }
 
-void CurrentIntegralController::connect(synapse* syn_)
+void IntegralCurrentController::connect(synapse* syn_)
 {
 
     // connect to a synpase
@@ -154,14 +154,14 @@ void CurrentIntegralController::connect(synapse* syn_)
 }
 
 
-void CurrentIntegralController::integrate(void)
+void IntegralCurrentController::integrate(void)
 {
 
 
     switch (control_type)
     {
         case 0:
-            mexErrMsgTxt("[CurrentIntegralController] misconfigured controller. Make sure this object is contained by a conductance or synapse object");
+            mexErrMsgTxt("[IntegralCurrentController] misconfigured controller. Make sure this object is contained by a conductance or synapse object");
             break;
 
 
@@ -229,7 +229,7 @@ void CurrentIntegralController::integrate(void)
             }
 
         default:
-            mexErrMsgTxt("[CurrentIntegralController] misconfigured controller");
+            mexErrMsgTxt("[IntegralCurrentController] misconfigured controller");
             break;
 
     }
@@ -239,11 +239,11 @@ void CurrentIntegralController::integrate(void)
 
 
 
-void CurrentIntegralController::checkSolvers(int k) {
+void IntegralCurrentController::checkSolvers(int k) {
     if (k == 0){
         return;
     } else {
-        mexErrMsgTxt("[CurrentIntegralController] unsupported solver order\n");
+        mexErrMsgTxt("[IntegralCurrentController] unsupported solver order\n");
     }
 }
 
