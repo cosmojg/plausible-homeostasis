@@ -29,13 +29,13 @@ x.dt = .1;
 % `M` a matrix representing every dimension of every mechanism in the tree. This matrix has size (nsteps, NC), where NC depends on the precise controllers used, and is automatiCally determined.
 % `I` the currents of every ion channel type in the model. This is a matrix of size (nsteps, n_cond)
 x.t_end = 1e5;
-[V,Ca,M,I] = x.integrate;
+[~,~,M,~] = x.integrate;
 
 % set calcium target to average calcium concentration
 x.AB.Ca_target = x.AB.Ca_average;
 
 % set channel controllers
-controllers = {'oleary/IntegralController', 'plausible-homeostasis/CurrentIntegralController'};
+controllers = {'oleary/IntegralController', 'plausible-homeostasis/prinz/CurrentIntegralController'};
 if controltype == 1
     x.AB.ACurrent.add(strjoin(controllers(1)));
     x.AB.CaS.add(strjoin(controllers(1)));
@@ -82,7 +82,7 @@ for i = 1:simulationcount
     g0 = (2e-3/x.AB.A)*rand(7,1);
     x.set('*Controller.m',g0);
     x.AB.Leak.gbar = (1e-4/x.AB.A)+((1.99e-2/x.AB.A)*rand());
-    [V,Ca,M,I] = x.integrate;
+    [~,~,M,~] = x.integrate;
 
     conductances(i,:) = x.get('*gbar');
     corelib.textbar(i,simulationcount);
@@ -136,7 +136,7 @@ ylabel('g (uS/mm^2)')
 
 % plot trace
 x.t_end = 5e3;
-[V,Ca,M,I] = x.integrate;
+[V,~,~,~] = x.integrate;
 subplot(2,1,2); hold on
 
 time = x.dt*(1:length(V))*1e-3;
