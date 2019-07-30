@@ -6,13 +6,13 @@
 // This controller can control either a synapse
 // or a conductance 
 
-#ifndef INTEGRALCURRENTCONTROLLER
-#define INTEGRALCURRENTCONTROLLER
+#ifndef CURRENTINTEGRALCONTROLLER
+#define CURRENTINTEGRALCONTROLLER
 #include "mechanism.hpp"
 #include <limits>
 
 //inherit controller class spec
-class IntegralCurrentController: public mechanism {
+class CurrentIntegralController: public mechanism {
 
 protected:
     // flag used to switch between
@@ -30,21 +30,30 @@ public:
     // mRNA concentration 
     double m = 0;
 
+    // i_Ca
+    double tau_filter = std::numeric_limits<double>::quiet_NaN();
+    double i_Ca_target = std::numeric_limits<double>::quiet_NaN();
+    double i_Ca_error = std::numeric_limits<double>::quiet_NaN();
+    double i_Ca_smooth = 0;
+
     // area of the container this is in
     double container_A;
 
     // specify parameters + initial conditions for 
     // mechanism that controls a conductance 
-    IntegralCurrentController(double tau_m_, double tau_g_, double m_)
+    CurrentIntegralController(double tau_m_, double tau_g_, double tau_filter_, double m_, double i_Ca_smooth_, double i_Ca_target_)
     {
 
         tau_m = tau_m_;
         tau_g = tau_g_;
+        tau_filter = tau_filter_;
         m = m_;
+        i_Ca_smooth = i_Ca_smooth_;
+        i_Ca_target = i_Ca_target_;
 
 
-        // if (tau_m<=0) {mexErrMsgTxt("[IntegralCurrentController] tau_m must be > 0. Perhaps you meant to set it to Inf?\n");}
-        if (tau_g<=0) {mexErrMsgTxt("[IntegralCurrentController] tau_g must be > 0. Perhaps you meant to set it to Inf?\n");}
+        // if (tau_m<=0) {mexErrMsgTxt("[CurrentIntegralController] tau_m must be > 0. Perhaps you meant to set it to Inf?\n");}
+        if (tau_g<=0) {mexErrMsgTxt("[CurrentIntegralController] tau_g must be > 0. Perhaps you meant to set it to Inf?\n");}
     }
 
     
@@ -63,7 +72,7 @@ public:
 };
 
 
-double IntegralCurrentController::getState(int idx)
+double CurrentIntegralController::getState(int idx)
 {
     if (idx == 1) {return m;}
     else if (idx == 2) {return channel->gbar;}
@@ -72,10 +81,10 @@ double IntegralCurrentController::getState(int idx)
 }
 
 
-int IntegralCurrentController::getFullStateSize(){return 2; }
+int CurrentIntegralController::getFullStateSize(){return 2; }
 
 
-int IntegralCurrentController::getFullState(double *cont_state, int idx)
+int CurrentIntegralController::getFullState(double *cont_state, int idx)
 {
     // give it the current mRNA level
     cont_state[idx] = m;
@@ -97,7 +106,7 @@ int IntegralCurrentController::getFullState(double *cont_state, int idx)
 }
 
 
-void IntegralCurrentController::connect(conductance * channel_)
+void CurrentIntegralController::connect(conductance * channel_)
 {
 
     // connect to a channel
@@ -120,12 +129,12 @@ void IntegralCurrentController::connect(conductance * channel_)
 
 }
 
-void IntegralCurrentController::connect(compartment* comp_)
+void CurrentIntegralController::connect(compartment* comp_)
 {
-    mexErrMsgTxt("[IntegralCurrentController] This mechanism cannot connect to a compartment object");
+    mexErrMsgTxt("[CurrentIntegralController] This mechanism cannot connect to a compartment object");
 }
 
-void IntegralCurrentController::connect(synapse* syn_)
+void CurrentIntegralController::connect(synapse* syn_)
 {
 
     // connect to a synpase
@@ -145,14 +154,14 @@ void IntegralCurrentController::connect(synapse* syn_)
 }
 
 
-void IntegralCurrentController::integrate(void)
+void CurrentIntegralController::integrate(void)
 {
 
 
     switch (control_type)
     {
         case 0:
-            mexErrMsgTxt("[IntegralCurrentController] misconfigured controller. Make sure this object is contained by a conductance or synapse object");
+            mexErrMsgTxt("[CurrentIntegralController] misconfigured controller. Make sure this object is contained by a conductance or synapse object");
             break;
 
 
@@ -162,12 +171,14 @@ void IntegralCurrentController::integrate(void)
             // if the target is NaN, we will interpret this
             // as the controller being disabled 
             // and do nothing 
-            if (isnan((channel->container)->Ca_target)) {return;}
-
-            double Ca_error = (channel->container)->Ca_target - (channel->container)->Ca_prev;
+            if (isnan(i_Ca_target)) {return;}
+          
+            // calculate i_Ca_smooth
+            i_Ca_smooth += (dt/tau_filter)*((channel->container)->i_Ca_prev-i_Ca_smooth);
+            i_Ca_error = i_Ca_smooth - i_Ca_target;
 
             // integrate mRNA
-            m += (dt/tau_m)*(Ca_error);
+            m += (dt/tau_m)*(i_Ca_error);
 
             // mRNA levels below zero don't make any sense
             if (m < 0) {m = 0;}
@@ -218,7 +229,7 @@ void IntegralCurrentController::integrate(void)
             }
 
         default:
-            mexErrMsgTxt("[IntegralCurrentController] misconfigured controller");
+            mexErrMsgTxt("[CurrentIntegralController] misconfigured controller");
             break;
 
     }
@@ -228,11 +239,11 @@ void IntegralCurrentController::integrate(void)
 
 
 
-void IntegralCurrentController::checkSolvers(int k) {
+void CurrentIntegralController::checkSolvers(int k) {
     if (k == 0){
         return;
     } else {
-        mexErrMsgTxt("[IntegralCurrentController] unsupported solver order\n");
+        mexErrMsgTxt("[CurrentIntegralController] unsupported solver order\n");
     }
 }
 
